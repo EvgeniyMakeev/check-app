@@ -1,5 +1,5 @@
 # check-app
-Clevertec test task
+Тестовое задание Clevertec
 
 ## Описание
 
@@ -41,18 +41,20 @@ id;number;discount amount, %
 Для запуска приложения используйте следующую команду:
 
 ```sh
-java -cp src ./src/main/java/ru/clevertec/check/CheckRunner.java id-quantity discountCard=xxxx balanceDebitCard=xxxx
+java -cp src ./src/main/java/ru/clevertec/check/CheckRunner.java id-quantity discountCard=xxxx balanceDebitCard=xxxx pathToFile=xxxx saveToFile=xxxx
 ```
 
 где:
 - `id-quantity` - идентификатор товара и его количество. Например, `1-3` означает товар с id=1 в количестве 3 штук.
 - `discountCard=xxxx` - номер дисконтной карты (четыре цифры).
 - `balanceDebitCard=xxxx` - баланс на дебетовой карте.
+- `pathToFile=xxxx` - путь к файлу с продуктами (обязательный параметр).
+- `saveToFile=xxxx` - путь к файлу для сохранения результата (обязательный параметр).
 
 ### Пример команды
 
 ```sh
-java -cp src ./src/main/java/ru/clevertec/check/CheckRunner.java 3-1 2-5 5-1 discountCard=1111 balanceDebitCard=100
+java -cp src ./src/main/java/ru/clevertec/check/CheckRunner.java 3-1 2-5 5-1 discountCard=1111 balanceDebitCard=100 pathToFile=./products.csv saveToFile=./result.csv
 ```
 
 В этом примере:
@@ -61,10 +63,12 @@ java -cp src ./src/main/java/ru/clevertec/check/CheckRunner.java 3-1 2-5 5-1 dis
 - `5-1` - товар с id=5 в количестве 1 штука.
 - `discountCard=1111` - предъявлена дисконтная карта с номером 1111.
 - `balanceDebitCard=100` - баланс на дебетовой карте равен 100.
+- `pathToFile=./products.csv` - указан путь к файлу с продуктами.
+- `saveToFile=./result.csv` - указан путь для сохранения результата.
 
 ## Результат
 
-После выполнения команды в корне проекта будет создан файл `result.csv`, содержащий список товаров, их количество, цену и рассчитанную сумму с учетом скидки по предъявленной карте (если она есть). Также чек будет продублирован в консоль.
+После выполнения команды в указанном файле `saveToFile` будет создан CSV файл с результатами, содержащий список товаров, их количество, цену и рассчитанную сумму с учетом скидки по предъявленной карте (если она есть). Также чек будет продублирован в консоль.
 
 ### Пример вывода
 
@@ -87,8 +91,8 @@ TOTAL PRICE;TOTAL DISCOUNT;TOTAL WITH DISCOUNT
 ## Примечания
 
 - Название и путь к CSV-файлам:
-    - `products.csv` должен находиться по пути `./src/main/resources/products.csv`
-    - `discountCards.csv` должен находиться по пути `./src/main/resources/discountCards.csv`
+  - `products.csv` должен находиться по пути `./src/main/resources/products.csv`
+  - `discountCards.csv` должен находиться по пути `./src/main/resources/discountCards.csv`
 - Все параметры указываются через пробел.
 - В наборе параметров должна быть минимум одна связка `id-quantity`.
 - Номер дисконтной карты должен содержать ровно четыре цифры.
@@ -98,3 +102,5 @@ TOTAL PRICE;TOTAL DISCOUNT;TOTAL WITH DISCOUNT
 
 - Идентификаторы товаров могут повторяться: например, `1-3 2-5 1-1` эквивалентно `1-4 2-5`.
 - При количестве оптового товара от пяти и более штук на эту позицию применяется скидка 10%, персональная скидка по карте на эту позицию не действует.
+- Если не передан аргумент `pathToFile`, ошибка будет сохранена в файл `result.csv`.
+- Если не передан аргумент `saveToFile`, ошибка будет сохранена в файл `result.csv`.

@@ -1,9 +1,6 @@
 package ru.clevertec.check;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -14,39 +11,44 @@ import java.util.Optional;
 
 class CheckRunner {
 
-    private static final String PRODUCTS_FILE_PATH = "src/main/resources/products.csv";
     private static final String DISCOUNT_CARDS_FILE_PATH = "src/main/resources/discountCards.csv";
-    private static final String RESULT_FILE_PATH = "result.csv";
-
     private static final int BASE_DISCOUNT_AMOUNT = 2;
 
+    private static String productsFilePath = "";
+    private static String resultFilePath = "";
+
     private static final Map<Product, Integer> shoppingCart = new HashMap<>();
+    private static String argsProductsToChart = "";
     private static String discountCardNumber = "";
     private static double balanceDebitCard = 0.0;
 
-
     private static final ProductService PRODUCT_SERVICE = new ProductService(DAOFactory.createProductDAO());
     private static final DiscountCardService DISCOUNT_CARD_SERVICE = new DiscountCardService(DAOFactory.createDiscountCardDAO());
-    private static final CheckService CHECK_SERVICE = new CheckService(RESULT_FILE_PATH);
+    private static CheckService checkService;
 
     public static void main(String[] args) {
         try {
-            PRODUCT_SERVICE.readProductsFromCSV(PRODUCTS_FILE_PATH);
             DISCOUNT_CARD_SERVICE.readDiscountCardsFromCSV(DISCOUNT_CARDS_FILE_PATH);
 
             parseArguments(args);
+            checkingAgrs();
+
+            checkService = new CheckService(resultFilePath);
+
+            PRODUCT_SERVICE.readProductsFromCSV(productsFilePath);
+            readProductsToBay(argsProductsToChart);
 
             DiscountCard discountCard =
                     DISCOUNT_CARD_SERVICE.getDiscountCardByNumber(discountCardNumber)
                             .orElse(new DiscountCard(discountCardNumber, BASE_DISCOUNT_AMOUNT));
 
-            CHECK_SERVICE.makeCheck(discountCard, shoppingCart, balanceDebitCard);
+            checkService.makeCheck(discountCard, shoppingCart, balanceDebitCard);
         } catch (AnyProblemsWithProductOrEnteringArgumentsException
                  | AnyOtherException
                  | NotEnoughMoneyException
                  | IOException e) {
-            CHECK_SERVICE.saveToCSV(e.getMessage());
-            CHECK_SERVICE.printToConsole(e.getMessage());
+            checkService.saveToCSV(e.getMessage());
+            checkService.printToConsole(e.getMessage());
         }
     }
 
@@ -56,14 +58,26 @@ class CheckRunner {
                 readDiscountCardNumber(arg);
             } else if (arg.startsWith("balanceDebitCard=")) {
                 balanceDebitCard = Math.round(Double.parseDouble(arg.split("=")[1]));
+            } else if (arg.startsWith("pathToFile=")) {
+                productsFilePath = arg.split("=")[1];
+            } else if (arg.startsWith("saveToFile=")) {
+                resultFilePath = arg.split("=")[1];
             } else {
-                readProductsToBay(arg);
+                argsProductsToChart = arg;
             }
         }
     }
 
-    private static void readProductsToBay(String arg) throws AnyProblemsWithProductOrEnteringArgumentsException {
-        String[] productInfo = arg.split("-");
+    private static void checkingAgrs() throws AnyProblemsWithProductOrEnteringArgumentsException {
+        if (productsFilePath.isBlank() || resultFilePath.isBlank()) {
+            resultFilePath = "result.csv";
+            checkService = new CheckService(resultFilePath);
+            throw new AnyProblemsWithProductOrEnteringArgumentsException();
+        }
+    }
+
+    private static void readProductsToBay(String argsProductsToChart) throws AnyProblemsWithProductOrEnteringArgumentsException {
+        String[] productInfo = argsProductsToChart.split("-");
         long productId = Long.parseLong(productInfo[0]);
         int quantity = Integer.parseInt(productInfo[1]);
         Product product = PRODUCT_SERVICE.getProductById(productId);
