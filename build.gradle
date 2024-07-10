@@ -1,7 +1,6 @@
 plugins {
     id 'java'
     id 'application'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 repositories {
@@ -10,8 +9,12 @@ repositories {
 
 dependencies {
     implementation 'org.postgresql:postgresql:42.7.3'
+    testImplementation 'com.h2database:h2:2.1.214'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.12.0'
+    testImplementation 'org.assertj:assertj-core:3.26.3'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.0-M2'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.11.0-M2'
+    testImplementation 'org.junit.platform:junit-platform-launcher:1.11.0-M2'
 }
 
 java {
@@ -20,29 +23,33 @@ java {
     }
 }
 
+jar {
+    manifest {
+        attributes 'Main-Class': 'ru.clevertec.check.CheckRunner'
+    }
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    destinationDirectory = file("$projectDir/build/libs")
+
+    doLast {
+        copy {
+            from archiveFile.get().asFile
+            into projectDir
+        }
+    }
+}
+
 test {
     useJUnitPlatform()
 }
 
 wrapper {
-    gradleVersion("9.0")
+    gradleVersion("8.8")
 }
 
 application {
     mainClass = 'ru.clevertec.check.CheckRunner'
-}
-
-//jar {
-//    manifest {
-//        attributes 'Main-Class': 'ru.clevertec.check.CheckRunner'
-//
-//    }
-//    destinationDirectory = file("$projectDir")
-//}
-
-shadowJar {
-    archiveBaseName.set('clevertec-check')
-    archiveVersion.set('')
-    archiveClassifier.set('')
-    destinationDirectory = file("$projectDir")
 }

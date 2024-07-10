@@ -27,14 +27,12 @@ public class DiscountCardDAOInDb implements DAO<DiscountCard, Integer> {
             statement.setInt(1, discountCardNumber);
             DiscountCard discountCard = null;
             ResultSet resultSet = statement.executeQuery();
-
             if (resultSet.next()) {
                 discountCard = new DiscountCard(
-                        resultSet.getLong("id"),
+                        resultSet.getInt("id"),
                         discountCardNumber,
                         resultSet.getInt("amount"));
             }
-
             resultSet.close();
             return Optional.ofNullable(discountCard);
         } catch (SQLException e) {
