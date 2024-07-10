@@ -3,58 +3,57 @@
 
 ## Описание
 
-Это приложение предназначено для создания чека на основе переданных данных о товарах и дисконтных картах. Приложение считывает данные из CSV файлов, принимает параметры через командную строку и генерирует CSV файл с результатами.
+Это приложение предназначено для создания чека на основе переданных данных о товарах и дисконтных картах. Приложение считывает данные из базы данных PostgreSQL, принимает параметры через командную строку и генерирует CSV файл с результатами.
 
 ## Структура проекта
 
 - `src/main/java/ru/clevertec/check/CheckRunner.java` - основной класс для запуска приложения.
-- `src/main/resources/products.csv` - файл с информацией о продуктах.
-- `src/main/resources/discountCards.csv` - файл с информацией о дисконтных картах.
+- `src/main/resources/data.sql` - файл с DDL и DML операциями для базы данных.
 - `result.csv` - файл, в который сохраняется чек.
 
-## Формат CSV файлов
+## Формат базы данных
 
-### products.csv
+### Таблица продуктов
 
-Файл `products.csv` должен содержать информацию о продуктах в следующем формате:
+Таблица `product` должна содержать информацию о продуктах в следующем формате:
 
-```
-id;description;price, $;quantity in stock;wholesale product
-1;Product 1;10.00;100;+
-2;Product 2;20.00;50;-
-...
-```
+| id | description | price  | quantity_in_stock | wholesale_product |
+|----|-------------|--------|-------------------|-------------------|
+| 1  | Product 1   | 10.00  | 100               | true              |
+| 2  | Product 2   | 20.00  | 50                | false             |
+| ...| ...         | ...    | ...               | ...               |
 
-### discountCards.csv
+### Таблица дисконтных карт
 
-Файл `discountCards.csv` должен содержать информацию о дисконтных картах в следующем формате:
+Таблица `discount_card` должна содержать информацию о дисконтных картах в следующем формате:
 
-```
-id;number;discount amount, %
-1;1111;5
-2;2222;10
-...
-```
+| id | number | discount_amount |
+|----|--------|-----------------|
+| 1  | 1111   | 5               |
+| 2  | 2222   | 10              |
+| ...| ...    | ...             |
 
 ## Запуск приложения
 
 Для запуска приложения используйте следующую команду:
 
 ```sh
-java -cp src ./src/main/java/ru/clevertec/check/CheckRunner.java id-quantity discountCard=xxxx balanceDebitCard=xxxx pathToFile=xxxx saveToFile=xxxx
+java -jar clevertec-check.jar id-quantity discountCard=xxxx balanceDebitCard=xxxx saveToFile=xxxx datasource.url=xxxx datasource.username=xxxx datasource.password=xxxx
 ```
 
 где:
 - `id-quantity` - идентификатор товара и его количество. Например, `1-3` означает товар с id=1 в количестве 3 штук.
 - `discountCard=xxxx` - номер дисконтной карты (четыре цифры).
 - `balanceDebitCard=xxxx` - баланс на дебетовой карте.
-- `pathToFile=xxxx` - путь к файлу с продуктами (обязательный параметр).
 - `saveToFile=xxxx` - путь к файлу для сохранения результата (обязательный параметр).
+- `datasource.url=xxxx` - URL для подключения к базе данных PostgreSQL.
+- `datasource.username=xxxx` - имя пользователя для подключения к базе данных.
+- `datasource.password=xxxx` - пароль для подключения к базе данных.
 
 ### Пример команды
 
 ```sh
-java -cp src ./src/main/java/ru/clevertec/check/CheckRunner.java 3-1 2-5 5-1 discountCard=1111 balanceDebitCard=100 pathToFile=./products.csv saveToFile=./result.csv
+java -jar clevertec-check.jar 3-1 2-5 5-1 discountCard=1111 balanceDebitCard=100 saveToFile=./result.csv datasource.url=jdbc:postgresql://localhost:5432/check datasource.username=postgres datasource.password=postgres
 ```
 
 В этом примере:
@@ -63,8 +62,10 @@ java -cp src ./src/main/java/ru/clevertec/check/CheckRunner.java 3-1 2-5 5-1 dis
 - `5-1` - товар с id=5 в количестве 1 штука.
 - `discountCard=1111` - предъявлена дисконтная карта с номером 1111.
 - `balanceDebitCard=100` - баланс на дебетовой карте равен 100.
-- `pathToFile=./products.csv` - указан путь к файлу с продуктами.
 - `saveToFile=./result.csv` - указан путь для сохранения результата.
+- `datasource.url=jdbc:postgresql://localhost:5432/check` - URL базы данных PostgreSQL.
+- `datasource.username=postgres` - имя пользователя для базы данных PostgreSQL.
+- `datasource.password=postgres` - пароль для базы данных PostgreSQL.
 
 ## Результат
 
@@ -90,9 +91,8 @@ TOTAL PRICE;TOTAL DISCOUNT;TOTAL WITH DISCOUNT
 
 ## Примечания
 
-- Название и путь к CSV-файлам:
-  - `products.csv` должен находиться по пути `./src/main/resources/products.csv`
-  - `discountCards.csv` должен находиться по пути `./src/main/resources/discountCards.csv`
+- Название и путь к SQL-файлу:
+  - `data.sql` должен находиться по пути `./src/main/resources/data.sql`.
 - Все параметры указываются через пробел.
 - В наборе параметров должна быть минимум одна связка `id-quantity`.
 - Номер дисконтной карты должен содержать ровно четыре цифры.
@@ -102,5 +102,5 @@ TOTAL PRICE;TOTAL DISCOUNT;TOTAL WITH DISCOUNT
 
 - Идентификаторы товаров могут повторяться: например, `1-3 2-5 1-1` эквивалентно `1-4 2-5`.
 - При количестве оптового товара от пяти и более штук на эту позицию применяется скидка 10%, персональная скидка по карте на эту позицию не действует.
-- Если не передан аргумент `pathToFile`, ошибка будет сохранена в файл `result.csv`.
 - Если не передан аргумент `saveToFile`, ошибка будет сохранена в файл `result.csv`.
+- Настройки подключения к БД передаются через аргументы командной строки и являются обязательными параметрами.
