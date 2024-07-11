@@ -31,7 +31,7 @@ public class DiscountCardDAOInDb implements DAO<DiscountCard, Integer> {
                 discountCard = new DiscountCard(
                         resultSet.getInt("id"),
                         discountCardNumber,
-                        resultSet.getInt("amount"));
+                        resultSet.getInt("discount_amount"));
             }
             resultSet.close();
             return Optional.ofNullable(discountCard);
