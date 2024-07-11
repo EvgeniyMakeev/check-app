@@ -68,7 +68,7 @@ public class ProductDAOInDb implements DAO<Product> {
     public List<Product> getAll() throws AnyOtherException {
         try (Connection connection = connectionManager.open();
              PreparedStatement statement =
-                     connection.prepareStatement("SELECT * FROM public.product?")) {
+                     connection.prepareStatement("SELECT * FROM public.product")) {
             ResultSet resultSet = statement.executeQuery();
 
             List<Product> products = new ArrayList<>();

@@ -13,19 +13,20 @@ import ru.clevertec.check.model.Product;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
 class ProductServiceTest {
+
     @Mock
     private Product mockProduct;
 
     @Mock
-    private DAO<Product, Long> productDao;
+    private DAO<Product> productDao;
 
     @InjectMocks
     private ProductService productService;
@@ -47,14 +48,41 @@ class ProductServiceTest {
     }
 
     @Test
-    void getProductById_shouldTrowException() throws AnyOtherException {
+    void getProductById_shouldThrowException() throws AnyOtherException {
         when(productDao.getBy(2L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() ->
-                productService.getProductById(2L))
+        assertThatThrownBy(() -> productService.getProductById(2L))
                 .isInstanceOf(AnyProblemsWithProductOrEnteringArgumentsException.class);
 
         verify(productDao, times(1)).getBy(2L);
     }
 
+    @Test
+    void addProduct_shouldAddProduct() throws AnyOtherException {
+        Product newProduct = new Product(1L, "New Product", 100.0, 50, true);
+        doNothing().when(productDao).add(newProduct);
+
+        productService.addProduct(newProduct);
+
+        verify(productDao, times(1)).add(newProduct);
+    }
+
+    @Test
+    void updateProduct_shouldUpdateProduct() throws AnyOtherException {
+        Product updatedProduct = new Product(1L, "Updated Product", 200.0, 100, false);
+        doNothing().when(productDao).update(updatedProduct);
+
+        productService.updateProduct(1L, updatedProduct);
+
+        verify(productDao, times(1)).update(updatedProduct);
+    }
+
+    @Test
+    void deleteProduct_shouldDeleteProduct() throws AnyOtherException {
+        doNothing().when(productDao).delete(1L);
+
+        productService.deleteProduct(1L);
+
+        verify(productDao, times(1)).delete(1L);
+    }
 }
