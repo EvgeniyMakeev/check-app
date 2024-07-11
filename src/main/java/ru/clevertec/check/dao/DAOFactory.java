@@ -7,11 +7,11 @@ import ru.clevertec.check.model.Product;
 import ru.clevertec.check.util.ConnectionManager;
 
 public class DAOFactory {
-    public static DAO<Product, Long> createProductDAO(ConnectionManager connectionManager) {
+    public static DAO<Product> createProductDAO(ConnectionManager connectionManager) {
         return new ProductDAOInDb(connectionManager);
     }
 
-    public static DAO<DiscountCard, Integer> createDiscountCardDAO(ConnectionManager connectionManager) {
+    public static DAO<DiscountCard> createDiscountCardDAO(ConnectionManager connectionManager) {
         return new DiscountCardDAOInDb(connectionManager);
     }
 }

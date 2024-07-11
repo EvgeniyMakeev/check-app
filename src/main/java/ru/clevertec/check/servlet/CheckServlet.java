@@ -58,7 +58,7 @@ public class CheckServlet extends HttpServlet {
 
                 checkService.makeCheck(discountCard,shoppingCart,purchaseDTO.balanceDebitCard());
 
-                response.setStatus(HttpServletResponse.SC_CREATED);
+                response.setStatus(HttpServletResponse.SC_OK);
                 response.setContentType("application/csv");
                 response.setHeader("Content-Disposition", "attachment; filename=\"" + csvFilePath + "\"");
 
