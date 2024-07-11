@@ -26,7 +26,7 @@ public record Check(int numberOfDiscountCard,
 
         purchasedProducts.forEach(stringBuilderCSV::append);
 
-        if (numberOfDiscountCard != -1) {
+        if (numberOfDiscountCard != 0) {
             stringBuilderCSV.append("\nDISCOUNT CARD;DISCOUNT PERCENTAGE\n")
                     .append(String.format("%04d", numberOfDiscountCard))
                     .append(";")

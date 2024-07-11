@@ -25,16 +25,18 @@ public class DiscountCardDAOInDb implements DAO<DiscountCard, Integer> {
              PreparedStatement statement =
                      connection.prepareStatement("SELECT * FROM public.discount_card WHERE number=?")) {
             statement.setInt(1, discountCardNumber);
-            DiscountCard discountCard = null;
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                discountCard = new DiscountCard(
-                        resultSet.getInt("id"),
+                DiscountCard discountCard = new DiscountCard(
+                        resultSet.getLong("id"),
                         discountCardNumber,
-                        resultSet.getInt("amount"));
+                        resultSet.getInt("discount_amount"));
+                resultSet.close();
+                return Optional.of(discountCard);
+            } else {
+                resultSet.close();
+                return Optional.empty();
             }
-            resultSet.close();
-            return Optional.ofNullable(discountCard);
         } catch (SQLException e) {
             throw new AnyOtherException();
         }

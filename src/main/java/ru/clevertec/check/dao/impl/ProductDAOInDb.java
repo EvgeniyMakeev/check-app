@@ -25,19 +25,20 @@ public class ProductDAOInDb implements DAO<Product, Long> {
              PreparedStatement statement =
                      connection.prepareStatement("SELECT * FROM public.product WHERE id=?")) {
             statement.setLong(1, id);
-            Product product = null;
             ResultSet resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                product = new Product(id,
+                Product product = new Product(id,
                         resultSet.getString("description"),
                         resultSet.getDouble("price"),
                         resultSet.getInt("quantity_in_stock"),
                         resultSet.getBoolean("wholesale_product"));
+                resultSet.close();
+                return Optional.of(product);
+            } else {
+                resultSet.close();
+                return Optional.empty();
             }
-
-            resultSet.close();
-            return Optional.ofNullable(product);
         } catch (SQLException e) {
             throw new AnyOtherException();
         }

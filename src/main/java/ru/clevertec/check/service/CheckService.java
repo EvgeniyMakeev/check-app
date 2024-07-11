@@ -1,6 +1,5 @@
 package ru.clevertec.check.service;
 
-import ru.clevertec.check.exception.AnyOtherException;
 import ru.clevertec.check.exception.AnyProblemsWithProductOrEnteringArgumentsException;
 import ru.clevertec.check.exception.NotEnoughMoneyException;
 import ru.clevertec.check.model.Check;
@@ -19,7 +18,6 @@ public class CheckService {
     private static final double WHOLESALE_DISCOUNT = 0.10;
 
     private final String resultFilePath;
-
     private final List<String> purchasedProducts = new ArrayList<>();
     private double totalPrice = 0.0;
     private double totalDiscount = 0.0;
@@ -28,11 +26,8 @@ public class CheckService {
         this.resultFilePath = resultFilePath;
     }
 
-
     public void makeCheck(DiscountCard discountCard, Map<Product, Integer> shoppingCart, double balanceDebitCard)
-            throws IOException, AnyOtherException, NotEnoughMoneyException,
-            AnyProblemsWithProductOrEnteringArgumentsException {
-
+            throws NotEnoughMoneyException, AnyProblemsWithProductOrEnteringArgumentsException {
 
         double discountPercentage = discountCard.discountAmount() / 100.0;
 
@@ -51,10 +46,12 @@ public class CheckService {
                 .build();
 
         saveToCSV(check.toString());
-        printToConsole(check.toString());
+        clear();
     }
 
-    private void calculateCheck(Map<Product, Integer> productQuantities, double discountPercentage) throws AnyProblemsWithProductOrEnteringArgumentsException {
+
+    private void calculateCheck(Map<Product, Integer> productQuantities, double discountPercentage)
+            throws AnyProblemsWithProductOrEnteringArgumentsException {
         for (Map.Entry<Product, Integer> entry : productQuantities.entrySet()) {
             Product product = entry.getKey();
             int quantity = entry.getValue();
@@ -64,7 +61,8 @@ public class CheckService {
             }
 
             double total = product.price() * quantity;
-            double discount = product.isWholesale() && quantity >= MIN_WHOLESALE_QUANTITIES ? total * WHOLESALE_DISCOUNT : total * discountPercentage;
+            double discount = product.isWholesale() && quantity >= MIN_WHOLESALE_QUANTITIES ?
+                    total * WHOLESALE_DISCOUNT : total * discountPercentage;
 
             totalPrice += total;
             totalDiscount += discount;
@@ -82,7 +80,9 @@ public class CheckService {
         }
     }
 
-    public void printToConsole(String cvsResult) {
-        System.out.println(cvsResult);
+    private void clear() {
+        totalDiscount = 0.0;
+        totalPrice = 0.0;
+        purchasedProducts.clear();
     }
 }

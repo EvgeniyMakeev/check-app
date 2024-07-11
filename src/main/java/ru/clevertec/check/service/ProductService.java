@@ -12,7 +12,6 @@ public class ProductService {
         this.productDao = productDao;
     }
 
-
     public Product getProductById(long productId)
             throws AnyProblemsWithProductOrEnteringArgumentsException, AnyOtherException {
         return productDao.getBy(productId).orElseThrow(AnyProblemsWithProductOrEnteringArgumentsException::new);

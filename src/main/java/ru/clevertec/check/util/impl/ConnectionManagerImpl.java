@@ -21,6 +21,12 @@ public final class ConnectionManagerImpl implements ConnectionManager {
         }
     }
 
+    public ConnectionManagerImpl() {
+        url = System.getProperty("datasource.url");
+        username = System.getProperty("datasource.username");
+        password = System.getProperty("datasource.password");
+    }
+
     public ConnectionManagerImpl(String url, String username, String password) {
         this.url = url;
         this.username = username;
